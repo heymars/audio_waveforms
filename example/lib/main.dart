@@ -66,10 +66,14 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       ..androidOutputFormat = AndroidOutputFormat.mpeg4
       ..iosEncoder = IosEncoder.kAudioFormatMPEG4AAC
       ..sampleRate = 16000;
-    playerController1 = PlayerController()
-      ..addListener(() {
-        if (mounted) setState(() {});
-      });
+    playerController1 = PlayerController();
+    playerController1.onCurrentDurationChanged.listen((event) {
+      print(event);
+    });
+    playerController1.onPlayerStateChanged.listen((event) {
+      print(event);
+      setState(() {});
+    });
     playerController2 = PlayerController()
       ..addListener(() {
         if (mounted) setState(() {});
@@ -90,6 +94,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       ..addListener(() {
         if (mounted) setState(() {});
       });
+    print('player1 key -> ${playerController1.playerKey}');
+    print('player6 key -> ${playerController6.playerKey}');
   }
 
   void _preparePlayers() async {

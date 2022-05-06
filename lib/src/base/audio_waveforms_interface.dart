@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:audio_waveforms/src/base/current_duration_identifier.dart';
+
+import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:audio_waveforms/src/base/platform_streams.dart';
+import 'package:audio_waveforms/src/base/player_indentifier.dart';
+import 'package:flutter/services.dart';
 
 import '/src/base/constants.dart';
-import 'package:flutter/services.dart';
 
 class AudioWaveformsInterface {
   AudioWaveformsInterface._();
@@ -149,9 +151,18 @@ class AudioWaveformsInterface {
           var duration = call.arguments[Constants.current];
           var key = call.arguments[Constants.playerKey];
           if (duration.runtimeType == int) {
-            var indentifier = CurrentDurationIndentifier(key, duration);
-            PlatformStreams.instance.addDurationEvent(indentifier);
+            var indentifier = PlayerIdentifier<int>(key, duration);
+            PlatformStreams.instance.addCurrentDurationEvent(indentifier);
           }
+          break;
+        case Constants.onDidFinishPlayingAudio:
+          var key = call.arguments[Constants.playerKey];
+          var state = (call.arguments[Constants.isPlayindFinished] is bool) &&
+                  call.arguments[Constants.isPlayindFinished]
+              ? PlayerState.stopped
+              : PlayerState.playing;
+          var indentifier = PlayerIdentifier<PlayerState>(key, state);
+          PlatformStreams.instance.addPlayerStateEvent(indentifier);
       }
     });
   }

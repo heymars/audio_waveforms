@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:audio_waveforms/src/base/audio_waveforms_interface.dart';
 import 'package:audio_waveforms/src/base/platform_streams.dart';
+import 'package:audio_waveforms/src/base/player_indentifier.dart';
 import 'package:flutter/material.dart';
 
 class PlayerController extends ChangeNotifier {
@@ -15,6 +16,7 @@ class PlayerController extends ChangeNotifier {
 
   PlayerState _playerState = PlayerState.stopped;
 
+  //TODO: remove this
   ///provides current state of the player
   PlayerState get playerState => _playerState;
 
@@ -29,12 +31,24 @@ class PlayerController extends ChangeNotifier {
 
   final UniqueKey _playerKey = UniqueKey();
 
+  ///An unique key string associated with [this] player only
   String get playerKey => _playerKey.toString();
+
+  ///A stream to get current state of the player. This stream
+  ///will emit event whenever there is change in the playerState.
+  Stream<PlayerState> get onPlayerStateChanged =>
+      PlatformStreams.instance.onplayerStateChanged.filter(playerKey);
+
+  ///A Stream to get current duration. This stream will emit
+  ///duration in milliseconds every 200 milliseconds.
+  Stream<int> get onCurrentDurationChanged =>
+      PlatformStreams.instance.onDurationChanged.filter(playerKey);
 
   PlayerController() {
     if (!PlatformStreams.instance.isInitialised) {
       PlatformStreams.instance.init();
     }
+    //TODO: add this in above condtion
     AudioWaveformsInterface.instance.setMethodCallHandler();
   }
 
@@ -47,6 +61,8 @@ class PlayerController extends ChangeNotifier {
       _bufferData = bytes;
       if (_bufferData != null) {
         _playerState = PlayerState.readingComplete;
+        PlatformStreams.instance
+            .addPlayerStateEvent(PlayerIdentifier(playerKey, _playerState));
       } else {
         throw "Can't read given audio file";
       }
@@ -73,6 +89,8 @@ class PlayerController extends ChangeNotifier {
       if (isPrepared) {
         _maxDuration = await getDuration();
         _playerState = PlayerState.initialized;
+        PlatformStreams.instance
+            .addPlayerStateEvent(PlayerIdentifier(playerKey, _playerState));
       }
       notifyListeners();
     } else {
@@ -93,6 +111,8 @@ class PlayerController extends ChangeNotifier {
           .startPlayer(_playerKey.toString(), _seekToStart);
       if (isStarted) {
         _playerState = PlayerState.playing;
+        PlatformStreams.instance
+            .addPlayerStateEvent(PlayerIdentifier(playerKey, _playerState));
       } else {
         throw "Failed to start player";
       }
@@ -106,6 +126,8 @@ class PlayerController extends ChangeNotifier {
         .pausePlayer(_playerKey.toString());
     if (isPaused) {
       _playerState = PlayerState.paused;
+      PlatformStreams.instance
+          .addPlayerStateEvent(PlayerIdentifier(playerKey, _playerState));
     }
     notifyListeners();
   }
@@ -116,6 +138,8 @@ class PlayerController extends ChangeNotifier {
         .stopPlayer(_playerKey.toString());
     if (isStopped) {
       _playerState = PlayerState.stopped;
+      PlatformStreams.instance
+          .addPlayerStateEvent(PlayerIdentifier(playerKey, _playerState));
     }
     notifyListeners();
   }

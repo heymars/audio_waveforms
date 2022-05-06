@@ -1,3 +1,5 @@
+import 'package:audio_waveforms/src/base/player_indentifier.dart';
+
 extension DurationExtension on Duration {
   ///converts duration to HH:MM:SS format
   String toHHMMSS() => toString().split('.').first.padLeft(8, "0");
@@ -106,4 +108,10 @@ enum DurationType {
 
   ///Default
   max
+}
+
+extension FilterForPlayer<T> on Stream<PlayerIdentifier<T>> {
+  Stream<T> filter(String playerKey) {
+    return where((it) => it.playerKey == playerKey).map((it) => it.type);
+  }
 }

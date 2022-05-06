@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:audio_waveforms/src/base/current_duration_identifier.dart';
+import 'package:audio_waveforms/src/base/player_indentifier.dart';
+import 'package:audio_waveforms/src/base/utils.dart';
 
 ///This class should be used for any type of native streams.
 class PlatformStreams {
@@ -11,22 +12,39 @@ class PlatformStreams {
   bool isInitialised = false;
 
   void init() {
-    _durationStreamController =
-        StreamController<CurrentDurationIndentifier>.broadcast();
+    _currentDurationController =
+        StreamController<PlayerIdentifier<int>>.broadcast();
+    _playerStateController =
+        StreamController<PlayerIdentifier<PlayerState>>.broadcast();
     isInitialised = true;
   }
 
-  Stream<CurrentDurationIndentifier> get durationStream =>
-      _durationStreamController.stream;
+  Stream<PlayerIdentifier<int>> get onDurationChanged =>
+      _currentDurationController.stream;
 
-  late StreamController<CurrentDurationIndentifier> _durationStreamController;
+  Stream<PlayerIdentifier<PlayerState>> get onplayerStateChanged =>
+      _playerStateController.stream;
 
-  void addDurationEvent(CurrentDurationIndentifier event) {
-    _durationStreamController.add(event);
+  late StreamController<PlayerIdentifier<int>> _currentDurationController;
+
+  late StreamController<PlayerIdentifier<PlayerState>> _playerStateController;
+
+  void addCurrentDurationEvent(PlayerIdentifier<int> playerIdentifier) {
+    if (!_currentDurationController.isClosed) {
+      _currentDurationController.add(playerIdentifier);
+    }
+  }
+
+  void addPlayerStateEvent(PlayerIdentifier<PlayerState> playerIdentifier) {
+    if (!_playerStateController.isClosed) {
+      //TODO: provide a flag to stop player when playing the audio is completed
+      _playerStateController.add(playerIdentifier);
+    }
   }
 
   void dispose() async {
-    await _durationStreamController.close();
+    await _currentDurationController.close();
+    await _playerStateController.close();
     isInitialised = false;
   }
 }
