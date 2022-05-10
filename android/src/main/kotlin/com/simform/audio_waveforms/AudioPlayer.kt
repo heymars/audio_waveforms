@@ -139,13 +139,13 @@ class AudioPlayer(context: Context, channel: MethodChannel) {
             runnable[key] = object : Runnable {
                 override fun run() {
                     val currentPosition = players[key]?.currentPosition
+                    Log.d(LOG_TAG,  players[key]?.playbackState.toString())
                     if (currentPosition != null) {
                         val args: MutableMap<String, Any?> = HashMap()
                         args[Constants.current] = currentPosition
                         args[Constants.playerKey] = key
                         methodChannel.invokeMethod(Constants.onCurrentDuration, args)
                         handler.postDelayed(this, 200)
-                        Log.d(LOG_TAG,  players[key]?.playbackState.toString())
                     } else {
                         result.error(LOG_TAG, "Can't get current Position of player", "")
                     }
