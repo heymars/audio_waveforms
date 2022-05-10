@@ -27,6 +27,9 @@ class PlayerController extends ChangeNotifier {
 
   bool _seekToStart = true;
 
+  StreamController<int> _durationStreamController = StreamController();
+  late StreamSubscription _durationStreamSubscription;
+
   final UniqueKey _playerKey = UniqueKey();
 
   String get playerKey => _playerKey.toString();
@@ -163,6 +166,8 @@ class PlayerController extends ChangeNotifier {
   /// calling [stopAllPlayers] is still [required]
   void disposeFunc() async {
     if (playerState != PlayerState.stopped) await stopPlayer();
+    _durationStreamSubscription.cancel();
+    _durationStreamController.close();
     dispose();
   }
 
@@ -178,5 +183,12 @@ class PlayerController extends ChangeNotifier {
     PlatformStreams.instance.dispose();
     await AudioWaveformsInterface.instance.stopAllPlayers();
     dispose();
+  }
+
+  Stream<int> getDurationStream() {
+    _durationStreamSubscription = PlatformStreams.instance.durationStream.listen((event) {
+     _durationStreamController.add(event.duration);
+    });
+     return _durationStreamController.stream;
   }
 }
