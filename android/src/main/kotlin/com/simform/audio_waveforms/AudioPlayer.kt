@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.annotation.RequiresApi
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
@@ -144,6 +145,7 @@ class AudioPlayer(context: Context, channel: MethodChannel) {
                         args[Constants.playerKey] = key
                         methodChannel.invokeMethod(Constants.onCurrentDuration, args)
                         handler.postDelayed(this, 200)
+                        Log.d(LOG_TAG,  players[key]?.playbackState.toString())
                     } else {
                         result.error(LOG_TAG, "Can't get current Position of player", "")
                     }

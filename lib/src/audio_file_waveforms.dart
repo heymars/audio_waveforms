@@ -297,6 +297,7 @@ class _AudioFileWaveformsState extends State<AudioFileWaveforms>
   ///calculates densness according to width and seek progress
   void _updatePlayerPercent(Size size) {
     _audioProgress = _scrubberProgress();
+    debugPrint("_updatePlayerPercent============>$_audioProgress");
     _denseness = (size.width * _audioProgress).ceilToDouble();
     if (_denseness < 0) {
       _denseness = 0;
